@@ -1,0 +1,19 @@
+# 会社定義（data/ 以下のフォルダ名と対応）
+companies:
+  appdate:
+    name: 株式会社Appdate
+    folder: appdate
+    fiscal_end_month: 3
+  jincli:
+    name: 医療法人きたかみ腎クリニック
+    folder: jincli
+  harenoko:
+    name: 株式会社はれのこ
+    folder: harenoko
+  ej:
+    name: 株式会社EJ
+    folder: ej
+    format: mfcloud
+    fiscal_end_month: 9
+    # MF月次ファイル名の年号が期末の1年前になっているため +1 年補正
+    fiscal_year_shift: 1

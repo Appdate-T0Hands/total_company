@@ -1,0 +1,184 @@
+# 表示用勘定科目（複数社合算向け — 細めの統一科目）
+# 会社ごとに名称が違う科目はここで揃える。その他* は残高の内訳を展開表示。
+
+bs:
+  - section: 流動資産
+    accounts:
+      - name: 現金及び預金
+        match:
+          - 現金
+          - 普通預金
+          - 当座預金
+          - 現金及び預金
+          - 銀行預金
+          - 銀行預金（API連携）
+          - 楽天（法人）
+        patterns:
+          - ".*銀行.*"
+          - ".*（法人）（API）.*"
+          - ".*預金.*"
+          - "^GMO.*"
+          - "^ゆうちょ.*"
+          - "^七十七.*"
+          - "^住信SBI.*"
+          - "^岩手.*"
+          - "^北上.*"
+      - name: 売掛金
+        match: [売掛金, 医業未収金, 売上債権]
+      - name: 有価証券
+        match: [有価証券, SBI証券]
+      - name: 棚卸資産
+        match: [棚卸資産, 商品, 貯蔵品, 医薬品材料]
+      - name: 前払費用
+        match: [前払費用, 前渡金, 長期前払費用, 前払金]
+      - name: 仮払金
+        match: [仮払金, 仮払税金, 仮払消費税, 仮払法人税]
+      - name: 未収入金
+        match: [未収入金, 未収収益, 未収還付法人税等, 未収還付税金, 未収消費税]
+      - name: 短期貸付金
+        match: [短期貸付金, 立替金, 役員貸付金]
+        patterns: ["^立替金.*"]
+      - name: 預託金・保証金
+        match: [預託金, 預託証拠金, 差入保証金, 保証金, 敷金]
+        patterns: ["(?i)(bybit|coincheck|bit flyer|zaif|quoinex|theo|taotao)"]
+      - name: その他流動資産
+        match: [その他流動資産, 建設仮勘定, 暗号資産・FX口座, 諸口]
+
+  - section: 固定資産
+    accounts:
+      - name: 有形固定資産
+        match: [有形固定資産, 建物, 建物附属設備, 土地, 工具器具備品, 車両運搬具, 車輌運搬具, 一括償却資産]
+      - name: 無形固定資産
+        match: [無形固定資産, ソフトウェア, ソフトウェア仮勘定]
+      - name: 投資その他の資産
+        match: [投資その他の資産, 投資有価証券, 保険積立金, 長期貸付金, 出資金]
+
+  - section: 流動負債
+    accounts:
+      - name: 買掛金
+        match: [買掛金]
+      - name: 未払金
+        match: [未払金, 未払費用, 未払法人税等, 未払消費税等, 未払消費税]
+      - name: 短期借入金
+        match: [短期借入金, 役員借入金, 株主借入金]
+      - name: 仮受金
+        match: [仮受金, 仮受消費税, 前受金]
+      - name: 預り金
+        match: [預り金, 源泉預り金, 預り敷金, クレジットカード未払]
+      - name: 貸倒引当金
+        match: [貸倒引当金]
+        patterns: ["^貸倒引当金\\(.*\\)$"]
+      - name: その他流動負債
+        match: [その他流動負債, リース債務]
+
+  - section: 固定負債
+    accounts:
+      - name: 長期借入金
+        match: [長期借入金]
+      - name: その他固定負債
+        match: [固定負債, リース債務, 法人税等充当金]
+
+  - section: 純資産
+    accounts:
+      - name: 資本金
+        match: [資本金]
+      - name: 資本剰余金
+        match: [資本剰余金, 資本準備金]
+      - name: 利益剰余金
+        # freee月次では「繰越利益剰余金」は期首残高のまま動かないため、合計行を使う
+        match: [利益剰余金 計, 利益剰余金合計]
+      - name: その他純資産
+        match: [新株予約権, 評価・換算差額等, 別途積立金]
+
+pl:
+  - section: 売上高
+    accounts:
+      - name: 売上高
+        match: [売上高, 売上高 計, 賃料収入, 家賃収入, 国保収入, 社保収入, その他医業収入]
+        patterns: [".*収入.*"]
+
+  - section: 売上原価
+    accounts:
+      - name: 売上原価
+        match: [売上原価, 商品売上原価, 仕入高, 当期商品仕入, 診療材料費, 委託料, 衛生費, 外注費（売上原価）, 期首商品棚卸, 期末商品棚卸, 他勘定振替高(商)]
+      - name: 原価性管理費
+        match: [管理費]
+        patterns: ["^管理費$"]
+
+  - section: 販売管理費
+    accounts:
+      - name: 人件費（役員）
+        match: [役員報酬]
+      - name: 人件費（従業員等）
+        match: [給料手当, 賞与, 法定福利費, 福利厚生費, 給食費, 通勤費, 雑給]
+      - name: 地代家賃
+        match: [地代家賃, 賃借料, リース料]
+      - name: 水道光熱費
+        match: [水道光熱費]
+      - name: 通信費
+        match: [通信費]
+        patterns: ["^(AWS|Google|IIJ|Dropbox|money forward|exchangerAPI|trading view|Eight|スマート)"]
+      - name: 支払手数料
+        match: [支払手数料, 支払報酬料, 支払報酬]
+      - name: 減価償却費
+        match: [減価償却費]
+      - name: 租税公課
+        match: [租税公課, 固定資産税, 自動車税]
+      - name: 交際費
+        match: [交際費, 接待交際費]
+      - name: 消耗品費
+        match: [消耗品費, 備品・消耗品費]
+      - name: 修繕費
+        match: [修繕費, 車両費]
+      - name: 旅費交通費
+        match: [旅費交通費]
+      - name: 広告宣伝費
+        match: [広告宣伝費]
+      - name: 保険料
+        match: [保険料]
+      - name: 会議費
+        match: [会議費]
+      - name: 新聞図書費
+        match: [新聞図書費]
+      - name: 研修費
+        match: [研修費]
+      - name: 業務委託料
+        match: [業務委託料]
+      - name: 雑費
+        match: [雑費]
+      - name: 諸会費
+        match: [諸会費]
+      - name: その他販管費
+        match: [管理諸費, 諸口, 貸倒繰入額(販)]
+
+  - section: 営業外
+    accounts:
+      - name: 営業外収益
+        match: [営業外収益, 受取利息, 受取配当金, 雑収入, 為替差益, 貸倒引当金戻入益]
+      - name: 営業外費用
+        match: [営業外費用, 支払利息, 雑損失, 為替差損]
+
+  - section: 特別損益
+    accounts:
+      - name: 特別利益
+        match: [特別利益, 固定資産売却益, 前期損益修正益]
+      - name: 特別損失
+        match: [特別損失, 固定資産除却損, 有価証券売却損, 固定資産圧縮損]
+
+  - section: 損益サマリー
+    accounts:
+      - name: 売上総損益
+        match: [売上総損益金額, 売上総利益]
+      - name: 営業損益
+        match: [営業損益金額, 営業利益]
+      - name: 経常損益
+        match: [経常損益金額, 経常利益]
+      - name: 税引前当期純利益
+        match: [税引前当期純損益金額, 税引前当期純利益]
+      - name: 当期純利益
+        match: [当期純損益金額, 当期純利益, 当期純損失]
+
+  - section: 税金・当期利益
+    accounts:
+      - name: 法人税等
+        match: [法人税等, 法人税・住民税及び事業税, 法人税等調整額, 所得税]

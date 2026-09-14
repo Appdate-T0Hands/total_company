@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>total_company — 月次</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="sticky-top">
+    <header>
+      <h1>total_company</h1>
+      <p class="subtitle">月次 BS / PL — 科目クリックでグラフに追加</p>
+    </header>
+
+    <section class="controls">
+      <label>
+        表示
+        <select id="companySelect"></select>
+      </label>
+      <label>
+        表示範囲
+        <select id="rangeSelect">
+          <option value="all">全期間</option>
+          <option value="12">直近12ヶ月</option>
+          <option value="24">直近24ヶ月</option>
+        </select>
+      </label>
+      <label>
+        科目検索
+        <input id="searchInput" type="search" placeholder="例: 人件費, 税引前">
+      </label>
+    </section>
+
+    <section class="tab-bar">
+      <div class="tabs">
+        <button class="tab active" data-tab="bs">BS（貸借）</button>
+        <button class="tab" data-tab="pl">PL（損益）</button>
+      </div>
+    </section>
+  </div>
+
+  <section class="chart-panel" id="chartPanel">
+    <div class="chart-controls">
+      <label>
+        グラフ
+        <select id="chartMode">
+          <option value="timeline">月次推移</option>
+          <option value="yoy">同月比較（年別）</option>
+        </select>
+      </label>
+      <button type="button" id="clearChartBtn" class="btn-secondary">グラフをクリア</button>
+    </div>
+    <div id="chartSelection" class="chart-selection"></div>
+    <h2 id="chartTitle">科目をクリックするとグラフに追加されます</h2>
+    <div class="chart-canvas-wrap">
+      <canvas id="trendChart"></canvas>
+    </div>
+  </section>
+
+  <section class="meta" id="metaInfo"></section>
+  <section class="table-wrap" id="tableContainer"></section>
+
+  <script src="app.js"></script>
+</body>
+</html>

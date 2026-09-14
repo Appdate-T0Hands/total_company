@@ -1,0 +1,168 @@
+# 全会社共通の統一科目マッピング
+#
+# 使い方:
+#   - aliases: 完全一致で canonical に変換
+#   - pattern: 正規表現でマッチした名称を canonical に変換（merge: true で合算）
+#   - ルールに無い科目はそのまま表示（scan-unmapped で未登録を確認）
+#
+# 他社データ追加後、名称差分があれば aliases に追記してください。
+
+rules:
+  # --- 損益計算書 ---
+  - id: pl_outsourcing
+    canonical: 外注費（売上原価）
+    statement: [pl]
+    aliases:
+      - 外注費
+      - 外注費（売上原価）
+
+  - id: pl_rent
+    canonical: 地代家賃
+    statement: [pl]
+    aliases:
+      - 地代家賃
+      - 賃借料
+      - 家賃
+
+  - id: pl_entertainment
+    canonical: 交際費
+    statement: [pl]
+    aliases:
+      - 交際費
+      - 接待交際費
+
+  - id: pl_inventory_open
+    canonical: 期首商品棚卸
+    statement: [pl]
+    aliases:
+      - 期首商品棚卸
+      - 期首商品棚卸高
+
+  - id: pl_inventory_close
+    canonical: 期末商品棚卸
+    statement: [pl]
+    aliases:
+      - 期末商品棚卸
+      - 期末商品棚卸高
+
+  - id: pl_corp_tax
+    canonical: 法人税等
+    statement: [pl]
+    aliases:
+      - 法人税等
+      - 法人税・住民税及び事業税
+
+  # --- 貸借対照表: 口座・暗号資産をグループ化 ---
+  - id: bs_bank_api
+    canonical: 銀行預金（API連携）
+    statement: [bs]
+    pattern: ".+（法人）（API）"
+    merge: true
+
+  - id: bs_bank_manual
+    canonical: 銀行預金
+    statement: [bs]
+    pattern: "^(岩手医信|北上信金|岩手銀行|GMOあおぞら|楽天（法人）|住信SBI|七十七銀行|山形銀行)"
+    merge: true
+
+  - id: bs_deposit_parent
+    canonical: 銀行預金
+    statement: [bs]
+    aliases:
+      - 普通預金
+    merge: false
+
+  - id: bs_prepaid_tax
+    canonical: 仮払税金
+    statement: [bs]
+    aliases:
+      - 仮払税金
+      - 仮払法人税
+      - 仮払消費税
+
+  - id: bs_cash
+    canonical: 現金及び預金
+    statement: [bs]
+    aliases:
+      - 現金
+      - 小口現金
+      - 厨房_小口現金
+      - 小口現金_旧
+    merge: true
+
+  - id: bs_crypto
+    canonical: 暗号資産・FX口座
+    statement: [bs]
+    aliases:
+      - bybit
+      - Bybit
+      - coincheck
+      - CoinCheck
+      - SBI_FX
+      - bit flyer
+      - zaif
+      - QUOINEX
+    merge: true
+
+  - id: bs_credit_card
+    canonical: クレジットカード未払
+    statement: [bs]
+    aliases:
+      - JCBカード
+      - 三井住友VISAカード
+      - 三井住友VISAカード1
+    pattern: "^(UPSIDER|アメリカン・エキスプレス)"
+    merge: true
+
+# 見出し・小計行（マッピング対象外、そのまま表示）
+section_labels:
+  - 資産の部
+  - 負債の部
+  - 純資産の部
+  - 流動資産
+  - 固定資産
+  - 投資その他の資産
+  - 流動負債
+  - 固定負債
+  - 株主資本
+  - 評価・換算差額等
+  - 新株予約権
+  - 有形固定資産
+  - 無形固定資産
+  - 利益剰余金
+  - 資本剰余金
+  - 売上高
+  - 売上原価
+  - 販売管理費
+  - 営業外収益
+  - 営業外費用
+  - 特別利益
+  - 特別損失
+  - 資産 計
+  - 負債 計
+  - 純資産 計
+  - 負債及び純資産 計
+  - 流動資産 計
+  - 固定資産 計
+  - 投資その他の資産 計
+  - 流動負債 計
+  - 固定負債 計
+  - 株主資本 計
+  - 評価・換算差額等 計
+  - 新株予約権 計
+  - 有形固定資産 計
+  - 無形固定資産 計
+  - 利益剰余金 計
+  - 資本剰余金 計
+  - 売上高 計
+  - 売上原価 計
+  - 販売管理費 計
+  - 商品売上原価
+  - 期首
+  - 構成比
+  - 管理諸費
+  - 販売費及び一般管理費
+  - 売上総利益
+  - 現金及び預金
+  - 売上債権
+  - 有価証券

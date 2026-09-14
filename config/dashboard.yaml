@@ -1,0 +1,11 @@
+# ダッシュボード表示制御
+#
+# CSV の置き場:
+#   data/確定/{会社}/    … 確定済み
+#   data/未確定/{会社}/  … 未確定（同じ期間が両方にあれば確定を優先）
+
+consolidated_groups:
+  - id: core
+    name: 合算（4社）
+    members: [jincli, ej, harenoko, appdate]
+    default: true
