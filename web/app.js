@@ -1,18 +1,11 @@
+const CHART_STATE_KEY = "total_company_chart_state";
+
 let payload = null;
 let currentTab = "bs";
-let chart = null;
 let chartItems = [];
 let expandedKeys = new Set();
 let autoExpandToken = "";
-
-const COLORS = [
-  "rgba(29, 78, 216, 0.9)",
-  "rgba(220, 38, 38, 0.9)",
-  "rgba(5, 150, 105, 0.9)",
-  "rgba(234, 88, 12, 0.9)",
-  "rgba(124, 58, 237, 0.9)",
-  "rgba(8, 145, 178, 0.9)",
-];
+let chartWindowRef = null;
 
 function fmt(n) {
   if (n === null || n === undefined) return "—";
@@ -22,11 +15,6 @@ function fmt(n) {
 function fmtMonth(m) {
   const [y, mo] = m.split("-");
   return `${y}/${mo}`;
-}
-
-function fmtMonthShort(m) {
-  const [y, mo] = m.split("-");
-  return `${y.slice(2)}/${mo}`;
 }
 
 function itemKey(section, name) {
@@ -48,6 +36,70 @@ function ensureAutoExpand(co, sections) {
       }
     }
   }
+}
+
+function el(id) {
+  return document.getElementById(id);
+}
+
+function setText(id, text) {
+  const node = el(id);
+  if (node) node.textContent = text;
+}
+
+function saveChartState() {
+  const co = getCompany();
+  const prev = loadChartState();
+  localStorage.setItem(
+    CHART_STATE_KEY,
+    JSON.stringify({
+      ...prev,
+      chartItems,
+      companyName: co?.company_name || "",
+      tab: currentTab,
+      updatedAt: Date.now(),
+    })
+  );
+  notifyChartWindow();
+}
+
+function loadChartState() {
+  try {
+    return JSON.parse(localStorage.getItem(CHART_STATE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function notifyChartWindow() {
+  if (chartWindowRef && !chartWindowRef.closed) {
+    chartWindowRef.postMessage({ type: "chart-update" }, location.origin);
+  }
+}
+
+function openChartWindow() {
+  saveChartState();
+  const w = Math.max(960, Math.round(window.screen.availWidth * 0.9));
+  const h = Math.max(640, Math.round(window.screen.availHeight * 0.9));
+  const left = Math.round((window.screen.availWidth - w) / 2);
+  const top = Math.round((window.screen.availHeight - h) / 2);
+  const spec = [
+    `width=${w}`,
+    `height=${h}`,
+    `left=${left}`,
+    `top=${top}`,
+    "menubar=no",
+    "toolbar=no",
+    "location=no",
+    "scrollbars=no",
+    "resizable=yes",
+  ].join(",");
+  if (chartWindowRef && !chartWindowRef.closed) {
+    chartWindowRef.focus();
+    notifyChartWindow();
+    return;
+  }
+  chartWindowRef = window.open("chart.html?v=4", "total_company_chart", spec);
 }
 
 async function loadData() {
@@ -72,12 +124,20 @@ async function loadData() {
     autoExpandToken = "";
     render();
   });
-  document.getElementById("rangeSelect").addEventListener("change", render);
-  document.getElementById("searchInput").addEventListener("input", render);
-  document.getElementById("chartMode").addEventListener("change", updateChart);
-  document.getElementById("clearChartBtn").addEventListener("click", () => {
-    chartItems = [];
-    render();
+  el("rangeSelect")?.addEventListener("change", render);
+  el("searchInput")?.addEventListener("input", render);
+
+  window.addEventListener("storage", (e) => {
+    if (e.key !== CHART_STATE_KEY) return;
+    try {
+      const state = JSON.parse(e.newValue || "{}");
+      if (Array.isArray(state.chartItems) && !state.chartItems.length) {
+        chartItems = [];
+        highlightSelectedRows();
+      }
+    } catch {
+      /* ignore */
+    }
   });
 
   document.querySelectorAll(".tab").forEach((btn) => {
@@ -124,123 +184,14 @@ function toggleChartItem(section, acct, co) {
       series,
     });
   }
-  renderSelection();
-  updateChart();
+  saveChartState();
   highlightSelectedRows();
-}
-
-function renderSelection() {
-  const el = document.getElementById("chartSelection");
-  if (!chartItems.length) {
-    el.innerHTML = "";
-    return;
-  }
-  el.innerHTML = chartItems
-    .map(
-      (item, i) =>
-        `<span class="chip" style="border-color:${COLORS[i % COLORS.length]}">${item.label} <button type="button" data-key="${item.key}">×</button></span>`
-    )
-    .join("");
-  el.querySelectorAll("button").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      chartItems = chartItems.filter((x) => x.key !== btn.dataset.key);
-      renderSelection();
-      updateChart();
-      highlightSelectedRows();
-    });
-  });
+  if (chartItems.length) openChartWindow();
 }
 
 function highlightSelectedRows() {
   document.querySelectorAll("tr.account").forEach((tr) => {
     tr.classList.toggle("selected", chartItems.some((x) => x.key === tr.dataset.key));
-  });
-}
-
-function buildTimelineDatasets() {
-  return chartItems.map((item, i) => ({
-    label: item.label,
-    data: item.series.map(({ v }) => (v == null ? null : v)),
-    borderColor: COLORS[i % COLORS.length],
-    backgroundColor: COLORS[i % COLORS.length].replace("0.9", "0.15"),
-    spanGaps: false,
-    tension: 0.2,
-    pointRadius: 2,
-  }));
-}
-
-function buildYoYDatasets() {
-  const monthLabels = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
-  const datasets = [];
-
-  chartItems.forEach((item, itemIdx) => {
-    const byYear = {};
-    for (const { m, v } of item.series) {
-      if (v == null) continue;
-      const [y, mo] = m.split("-");
-      if (!byYear[y]) byYear[y] = {};
-      byYear[y][mo] = v;
-    }
-    for (const year of Object.keys(byYear).sort()) {
-      const color = COLORS[(itemIdx + Object.keys(byYear).indexOf(year)) % COLORS.length];
-      datasets.push({
-        label: `${item.label} (${year}年)`,
-        data: monthLabels.map((mo) => byYear[year][mo] ?? null),
-        borderColor: color,
-        backgroundColor: color.replace("0.9", "0.15"),
-        spanGaps: false,
-        tension: 0.2,
-        pointRadius: 2,
-      });
-    }
-  });
-  return datasets;
-}
-
-function updateChart() {
-  const mode = document.getElementById("chartMode").value;
-  const titleEl = document.getElementById("chartTitle");
-
-  if (!chartItems.length) {
-    titleEl.textContent = "科目をクリックするとグラフに追加されます";
-    if (chart) {
-      chart.destroy();
-      chart = null;
-    }
-    return;
-  }
-
-  titleEl.textContent =
-    mode === "yoy"
-      ? "同月比較 — 横軸は1月～12月、線は年度別"
-      : "月次推移 — クリックした科目を重ね表示";
-
-  const labels =
-    mode === "yoy"
-      ? ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
-      : chartItems[0].series.map(({ m }) => fmtMonthShort(m));
-
-  const datasets = mode === "yoy" ? buildYoYDatasets() : buildTimelineDatasets();
-
-  if (chart) chart.destroy();
-  chart = new Chart(document.getElementById("trendChart"), {
-    type: "line",
-    data: { labels, datasets },
-    options: {
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: datasets.length > 1, labels: { boxWidth: 10, font: { size: 11 } } },
-        tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${fmt(c.parsed.y)} 円` } },
-      },
-      layout: { padding: { left: 4, right: 4 } },
-      scales: {
-        y: { ticks: { callback: (v) => Number(v).toLocaleString("ja-JP"), font: { size: 9 }, maxTicksLimit: 5 } },
-        x: {
-          ticks: { font: { size: 9 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 },
-          grid: { display: false },
-        },
-      },
-    },
   });
 }
 
@@ -273,13 +224,13 @@ function render() {
   if (prov.length) {
     meta += ` — 未確定: ${prov.map(fmtMonth).join(", ")}`;
   }
-  document.getElementById("metaInfo").textContent = meta;
+  setText("metaInfo", meta);
 
   const table = document.createElement("table");
   const thead = document.createElement("thead");
   const hr = document.createElement("tr");
   hr.innerHTML =
-    `<th class="sticky-col">科目</th>` +
+    `<th class="sticky-col sticky-head">科目</th>` +
     months
       .map((m) => {
         const cov = isConsolidated && co.month_coverage ? co.month_coverage[m] : null;
@@ -293,7 +244,7 @@ function render() {
           badges.push(`<span class="cov prov">未確定</span>`);
         }
         const badge = badges.join("");
-        return `<th>${fmtMonth(m)}${badge}</th>`;
+        return `<th class="sticky-head">${fmtMonth(m)}${badge}</th>`;
       })
       .join("");
   thead.appendChild(hr);
@@ -384,8 +335,9 @@ function render() {
   }
 
   table.appendChild(tbody);
-  document.getElementById("tableContainer").innerHTML = "";
-  document.getElementById("tableContainer").appendChild(table);
+  const container = document.getElementById("tableContainer");
+  container.innerHTML = "";
+  container.appendChild(table);
 
   chartItems = chartItems.map((item) => {
     for (const section of sections) {
@@ -401,8 +353,7 @@ function render() {
     return item;
   });
 
-  renderSelection();
-  updateChart();
+  saveChartState();
   highlightSelectedRows();
 }
 

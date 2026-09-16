@@ -4,14 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>total_company — 月次</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
-<body>
+<body class="main-page">
   <div class="sticky-top">
     <header>
       <h1>total_company</h1>
-      <p class="subtitle">月次 BS / PL — 科目クリックでグラフに追加</p>
+      <p class="subtitle">月次 BS / PL — 科目クリックでグラフ（別ウィンドウ）</p>
     </header>
 
     <section class="controls">
@@ -41,27 +40,9 @@
     </section>
   </div>
 
-  <section class="chart-panel" id="chartPanel">
-    <div class="chart-controls">
-      <label>
-        グラフ
-        <select id="chartMode">
-          <option value="timeline">月次推移</option>
-          <option value="yoy">同月比較（年別）</option>
-        </select>
-      </label>
-      <button type="button" id="clearChartBtn" class="btn-secondary">グラフをクリア</button>
-    </div>
-    <div id="chartSelection" class="chart-selection"></div>
-    <h2 id="chartTitle">科目をクリックするとグラフに追加されます</h2>
-    <div class="chart-canvas-wrap">
-      <canvas id="trendChart"></canvas>
-    </div>
-  </section>
-
   <section class="meta" id="metaInfo"></section>
   <section class="table-wrap" id="tableContainer"></section>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

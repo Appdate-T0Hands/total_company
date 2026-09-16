@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja" class="chart-root">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>total_company — グラフ</title>
+  <link rel="stylesheet" href="styles.css?v=4">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body class="chart-window">
+  <header class="chart-window-header">
+    <div class="chart-window-heading">
+      <h1>total_company — グラフ</h1>
+      <p id="chartMeta" class="subtitle"></p>
+      <p id="chartTitle" class="chart-caption">メイン画面で科目をクリックするとここに表示されます</p>
+    </div>
+    <div class="chart-controls">
+      <label>
+        種類
+        <select id="chartType">
+          <option value="bar">棒グラフ</option>
+          <option value="line">折れ線</option>
+        </select>
+      </label>
+      <label>
+        表示
+        <select id="chartMode">
+          <option value="timeline">月次推移</option>
+          <option value="yoy">同月比較（年別）</option>
+        </select>
+      </label>
+      <button type="button" id="clearChartBtn" class="btn-secondary">グラフをクリア</button>
+    </div>
+  </header>
+
+  <div id="chartSelection" class="chart-selection chart-selection-window"></div>
+
+  <main class="chart-canvas-wrap chart-canvas-window">
+    <canvas id="trendChart"></canvas>
+  </main>
+
+  <script src="chart.js?v=4"></script>
+</body>
+</html>

@@ -119,7 +119,7 @@ def build_dashboard(
 
     web_src = root / "web"
     if web_src.is_dir():
-        for name in ("index.html", "app.js", "styles.css"):
+        for name in ("index.html", "chart.html", "app.js", "chart.js", "styles.css"):
             src = web_src / name
             if src.is_file():
                 shutil.copy2(src, out_dir / name)
