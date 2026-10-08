@@ -92,7 +92,9 @@ def _rollup_monthly_reports(
             continue
         normalized = normalize_report(report, mapper)
         for row in normalized:
-            if row.is_section and not row.values:
+            # MF Cloud は小計行（特別利益・営業外収益等）にも金額が入るため、
+            # 内訳と二重計上しないよう is_section は値の有無に関わらず除外する。
+            if row.is_section:
                 continue
             resolved = chart.resolve(row.canonical_name, statement)
             if not resolved:

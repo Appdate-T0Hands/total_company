@@ -166,6 +166,39 @@ def cmd_normalize(args: argparse.Namespace) -> int:
     return 0
 
 
+def _serve_dir(out_dir: Path, port: int, open_browser: bool, index_name: str = "index.html") -> int:
+    import functools
+    import http.server
+    import webbrowser
+
+    handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(out_dir))
+    httpd = http.server.ThreadingHTTPServer(("127.0.0.1", port), handler)
+    url = f"http://127.0.0.1:{port}/{index_name}"
+    print(f"Serving {out_dir} at {url}")
+    if open_browser:
+        webbrowser.open(url)
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("\nStopped.")
+    return 0
+
+
+def cmd_fiscal(args: argparse.Namespace) -> int:
+    from .fiscal_export import build_fiscal_dashboard
+
+    root = project_root()
+    companies = [args.company] if args.company else None
+    out_dirs = build_fiscal_dashboard(root, companies=companies)
+    for out_dir in out_dirs:
+        print(f"Fiscal view: {out_dir / 'index.html'}")
+
+    if args.serve:
+        target = out_dirs[0] if len(out_dirs) == 1 else root / "output" / "fiscal"
+        return _serve_dir(target, args.port, args.open)
+    return 0
+
+
 def cmd_dashboard(args: argparse.Namespace) -> int:
     from .dashboard import build_dashboard
 
@@ -175,23 +208,7 @@ def cmd_dashboard(args: argparse.Namespace) -> int:
     print(f"Dashboard: {out_dir / 'index.html'}")
 
     if args.serve:
-        import functools
-        import http.server
-        import webbrowser
-
-        port = args.port
-        handler = functools.partial(
-            http.server.SimpleHTTPRequestHandler, directory=str(out_dir)
-        )
-        httpd = http.server.ThreadingHTTPServer(("127.0.0.1", port), handler)
-        url = f"http://127.0.0.1:{port}/index.html"
-        print(f"Serving {out_dir} at {url}")
-        if args.open:
-            webbrowser.open(url)
-        try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            print("\nStopped.")
+        return _serve_dir(out_dir, args.port, args.open)
     return 0
 
 
@@ -249,6 +266,13 @@ def main(argv: list[str] | None = None) -> int:
     p_dash.add_argument("--port", type=int, default=8765, help="ポート番号")
     p_dash.add_argument("--open", action="store_true", help="ブラウザを開く")
     p_dash.set_defaults(func=cmd_dashboard)
+
+    p_fiscal = sub.add_parser("fiscal", help="決算期（1期）ごとの BS/PL 経年ビュー")
+    p_fiscal.add_argument("--company", help="特定会社のみ（例: jincli）")
+    p_fiscal.add_argument("--serve", action="store_true", help="ローカルサーバー起動")
+    p_fiscal.add_argument("--port", type=int, default=8766, help="ポート番号")
+    p_fiscal.add_argument("--open", action="store_true", help="ブラウザを開く")
+    p_fiscal.set_defaults(func=cmd_fiscal)
 
     args = parser.parse_args(argv)
     return args.func(args)

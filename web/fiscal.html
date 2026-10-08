@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>決算期推移</title>
+  <link rel="stylesheet" href="styles.css?v=5">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      padding: 0 1rem 1rem;
+    }
+    .summary-card {
+      background: var(--surface, #fff);
+      border: 1px solid var(--border, #ddd);
+      border-radius: 8px;
+      padding: 0.75rem 1rem 1rem;
+    }
+    .summary-card h3 {
+      margin: 0 0 0.5rem;
+      font-size: 0.95rem;
+    }
+    .summary-card canvas {
+      max-height: 220px;
+    }
+    .period-tag.prov {
+      color: #b45309;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    body.fiscal-page tr.section td.section-total {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      color: #312e81;
+      background: #e0e7ff;
+    }
+    body.fiscal-page tr.section td.section-name {
+      font-weight: 700;
+    }
+    body.fiscal-page tr.data-row.stripe-a td {
+      background: #ffffff;
+    }
+    body.fiscal-page tr.data-row.stripe-b td {
+      background: #f3f4f6;
+    }
+    body.fiscal-page tr.data-row.stripe-a .sticky-col {
+      background: #ffffff;
+    }
+    body.fiscal-page tr.data-row.stripe-b .sticky-col {
+      background: #f3f4f6;
+    }
+    body.fiscal-page tr.data-row.sub-row.stripe-a td {
+      background: #fffef8;
+    }
+    body.fiscal-page tr.data-row.sub-row.stripe-b td {
+      background: #f5f4ef;
+    }
+    body.fiscal-page tr.data-row.sub-row .sticky-col {
+      background: inherit;
+    }
+    body.fiscal-page tr.data-row:hover td {
+      background: #eef2ff !important;
+    }
+    body.fiscal-page tr.data-row:hover .sticky-col {
+      background: #eef2ff !important;
+    }
+  </style>
+</head>
+<body class="main-page fiscal-page">
+  <div class="sticky-top">
+    <header>
+      <h1 id="pageTitle">決算期推移</h1>
+      <p class="subtitle">8月始まり7月終わりの1期ごと（PLは期間累計、BSは期末残高）</p>
+    </header>
+    <section class="tab-bar">
+      <div class="tabs">
+        <button class="tab active" data-tab="pl">PL（損益）</button>
+        <button class="tab" data-tab="bs">BS（貸借）</button>
+      </div>
+    </section>
+  </div>
+
+  <section class="meta" id="metaInfo"></section>
+  <section class="summary-grid" id="summaryCharts"></section>
+  <section class="table-wrap" id="tableContainer"></section>
+
+  <script src="fiscal.js?v=2"></script>
+</body>
+</html>
