@@ -7,17 +7,43 @@
 - Python 3.10+
 - 依存: PyYAML（`requirements.txt`）
 
+システムの Python には入れず、プロジェクト直下の仮想環境 `.venv` を使う（`.gitignore` 対象）。
+
+### macOS / Linux
+
+```bash
+cd total_company
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Windows (PowerShell)
+
 ```powershell
 cd devroot\total_company
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
 ## 起動（ダッシュボード）
 
-プロジェクトルートで `PYTHONPATH=src` を通して実行する。
+プロジェクトルートで仮想環境を有効にし、`PYTHONPATH=src` を通して実行する。
+
+### macOS / Linux
+
+```bash
+cd total_company
+source .venv/bin/activate
+PYTHONPATH=src python -m total_company dashboard --serve --open
+```
+
+### Windows (PowerShell)
 
 ```powershell
 cd devroot\total_company
+.\.venv\Scripts\Activate.ps1
 $env:PYTHONPATH = "src"
 python -m total_company dashboard --serve --open
 ```
@@ -48,7 +74,11 @@ data/
 | harenoko | 株式会社はれのこ | freee 月次推移 | 5月 |
 | appdate | 株式会社Appdate | freee 月次推移 | 3月 |
 
-CSV を追加・更新したら、ダッシュボードを再生成する。
+CSV を追加・更新したら、ダッシュボードを再生成する。仮想環境を有効にした状態で実行する。
+
+```bash
+PYTHONPATH=src python -m total_company dashboard
+```
 
 ```powershell
 $env:PYTHONPATH = "src"
@@ -57,7 +87,9 @@ python -m total_company dashboard
 
 ## その他のコマンド
 
-```powershell
+仮想環境を有効にし、`PYTHONPATH=src` を設定してから実行する。
+
+```bash
 # 未マッピング科目の確認
 python -m total_company scan
 
